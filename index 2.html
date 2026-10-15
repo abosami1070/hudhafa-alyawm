@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>اليوم الدراسي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Reem+Kufi:wght@500;600;700&display=swap" rel="stylesheet">
+<script>
+/* ============================================================
+   إعدادات الربط — عدّل هذا القسم فقط
+   ------------------------------------------------------------
+   SUPABASE_URL : عنوان مشروع Supabase المشترك بين البوابتين.
+   SUPABASE_ANON_KEY : المفتاح العام (anon / publishable) نفسه
+     الموجود في بوابة المعلم. اتركه فارغًا لتعمل اللوحة بالعرض
+     التجريبي فقط. لا تضع هنا مفتاح service_role أبدًا، ولا أي
+     كلمة مرور.
+   ============================================================ */
+window.SD_CONFIG = {
+  SUPABASE_URL: "https://ghgunkkiosonxaemqnvf.supabase.co",
+  SUPABASE_ANON_KEY: "",
+  PORTALS: {
+    teacher:      "https://startling-hotteok-39bb09.netlify.app",
+    teacherAdmin: "https://startling-hotteok-39bb09.netlify.app/#admin",
+    attendance:   "https://magical-horse-4fdcae.netlify.app",
+    rollcall:     "https://friendly-pudding-372312.netlify.app"
+  }
+};
+</script>
+<style>
+:root{
+  --paper:#EEF2EF; --surface:#FFFFFF; --sunk:#E3E9E5;
+  --ink:#15332C; --ink-2:#4B5F58; --line:#D3DCD7;
+  --brass:#9C7630; --brass-soft:#F1E7D2;
+  --late:#A9640C; --late-soft:#F8EAD6;
+  --absent:#A33A28; --absent-soft:#F6E0DB;
+  --viol:#64408F; --viol-soft:#ECE4F5;
+  --ok:#2C6F4C; --ok-soft:#DDEEE4;
+  --kufi:"Reem Kufi","IBM Plex Sans Arabic",Tahoma,sans-serif;
+  --sans:"IBM Plex Sans Arabic","Segoe UI",Tahoma,"Geeza Pro",sans-serif;
+  color-scheme: light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E1916; --surface:#15231F; --sunk:#1B2D28;
+    --ink:#E4EDE8; --ink-2:#9EB2AA; --line:#2A3D37;
+    --brass:#D3AE62; --brass-soft:#33291A;
+    --late:#E59C3E; --late-soft:#36280F;
+    --absent:#E5806D; --absent-soft:#3A1E19;
+    --viol:#B497DE; --viol-soft:#2A2238;
+    --ok:#62BD8E; --ok-soft:#173327;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E1916; --surface:#15231F; --sunk:#1B2D28;
+  --ink:#E4EDE8; --ink-2:#9EB2AA; --line:#2A3D37;
+  --brass:#D3AE62; --brass-soft:#33291A;
+  --late:#E59C3E; --late-soft:#36280F;
+  --absent:#E5806D; --absent-soft:#3A1E19;
+  --viol:#B497DE; --viol-soft:#2A2238;
+  --ok:#62BD8E; --ok-soft:#173327;
+  color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
+body{margin:0;min-height:100%;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--brass);outline-offset:2px;border-radius:4px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* ---------- shell ---------- */
+.shell{display:grid;grid-template-columns:232px 1fr;min-height:100vh}
+.side{background:var(--ink);color:var(--paper);padding:22px 16px;position:sticky;top:0;height:100vh;align-self:start;display:flex;flex-direction:column;gap:18px}
+:root[data-theme="dark"] .side{background:#0A1310}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .side{background:#0A1310;color:var(--ink)}}
+.brand{font-family:var(--kufi);font-size:26px;font-weight:700;line-height:1.2}
+.brand small{display:block;font-family:var(--sans);font-size:12px;font-weight:400;opacity:.75;margin-top:6px;line-height:1.5}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav a{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;text-decoration:none;font-weight:500;opacity:.82}
+.nav a:hover{opacity:1;background:rgba(255,255,255,.07)}
+.nav a[aria-current="page"]{opacity:1;background:rgba(255,255,255,.12);box-shadow:inset -3px 0 0 var(--brass)}
+.nav svg{width:18px;height:18px;flex:none}
+.side .portals{margin-top:auto;border-top:1px solid rgba(255,255,255,.14);padding-top:14px;display:flex;flex-direction:column;gap:6px;font-size:13px}
+.side .portals span{opacity:.6}
+.side .portals a{text-decoration:none;opacity:.85}
+.side .portals a:hover{opacity:1;text-decoration:underline}
+
+.main{min-width:0;padding:22px clamp(14px,3vw,36px) 40px}
+.bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.bar .who{margin-inline-start:auto;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink-2)}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;background:var(--sunk);font-size:12px;font-weight:600;color:var(--ink)}
+.chip.demo{background:var(--brass-soft);color:var(--brass)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:var(--surface);padding:7px 14px;border-radius:8px;cursor:pointer;font-weight:500;text-decoration:none;font-size:14px;min-height:38px}
+.btn:hover{border-color:var(--ink-2)}
+.btn.primary{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.btn.ghost{background:transparent}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+
+.banner{border:1px dashed var(--brass);background:var(--brass-soft);color:var(--ink);border-radius:10px;padding:10px 14px;font-size:14px;margin-bottom:16px}
+.banner b{color:var(--brass)}
+.notice{border-inline-start:3px solid var(--late);background:var(--surface);padding:10px 14px;border-radius:6px;font-size:14px;color:var(--ink-2)}
+.notice.err{border-color:var(--absent)}
+
+/* ---------- day hero ---------- */
+.day{display:grid;grid-template-columns:minmax(200px,auto) 1fr;gap:28px;align-items:end;padding:6px 0 22px;border-bottom:1px solid var(--line);margin-bottom:22px}
+.day h1{font-family:var(--kufi);font-size:clamp(44px,7vw,72px);line-height:1;margin:0;font-weight:700;letter-spacing:0}
+.day .dates{margin-top:10px;color:var(--ink-2);font-size:14px;display:flex;flex-direction:column}
+.day .dates strong{color:var(--ink);font-weight:600}
+.band-wrap{min-width:0}
+.band-title{font-size:13px;color:var(--ink-2);margin-bottom:8px;display:flex;justify-content:space-between;gap:8px}
+.band{display:flex;gap:4px;overflow-x:auto;padding-bottom:4px}
+.slot{flex:1 1 0;min-width:62px;border-radius:8px;background:var(--surface);border:1px solid var(--line);padding:8px 8px 7px;position:relative}
+.slot.brk{flex:.45 1 0;min-width:34px;background:transparent;border-style:dashed;display:flex;align-items:center;justify-content:center;color:var(--ink-2);font-size:11px;writing-mode:vertical-rl}
+.slot .no{font-family:var(--kufi);font-size:22px;line-height:1;font-weight:600}
+.slot .tm{font-size:11px;color:var(--ink-2);margin-top:4px;white-space:nowrap}
+.slot.past{opacity:.5}
+.slot.now{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.slot.now .tm{color:inherit;opacity:.8}
+.slot .cov{position:absolute;top:6px;left:6px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:var(--brass);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.slot .unc{background:var(--absent)}
+.offday{font-family:var(--kufi);font-size:22px;color:var(--brass)}
+
+/* ---------- tallies ---------- */
+.tally{display:grid;grid-template-columns:repeat(4,1fr);background:var(--surface);border:1px solid var(--line);border-radius:12px;margin-bottom:22px;overflow:hidden}
+.tally > div{padding:14px 18px;border-inline-start:1px solid var(--line)}
+.tally > div:first-child{border-inline-start:0}
+.tally .n{font-family:var(--kufi);font-size:38px;line-height:1.1;font-weight:600}
+.tally .l{font-size:13px;color:var(--ink-2)}
+.tally .late .n{color:var(--late)} .tally .absent .n{color:var(--absent)} .tally .exc .n{color:var(--ok)} .tally .viol .n{color:var(--viol)}
+.tally.off{opacity:.55}
+
+/* ---------- panels ---------- */
+.cols{display:grid;grid-template-columns:1.25fr 1fr;gap:22px;align-items:start}
+.panel{margin-bottom:22px}
+.panel > h2{font-size:17px;margin:0 0 10px;display:flex;align-items:baseline;gap:10px}
+.panel > h2 .meta{font-size:12px;font-weight:400;color:var(--ink-2)}
+.panel > h2 a{margin-inline-start:auto;font-size:13px;font-weight:500;color:var(--brass)}
+.list{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.row{display:flex;gap:12px;align-items:center;padding:10px 14px;border-top:1px solid var(--line)}
+.row:first-child{border-top:0}
+.row .k{font-family:var(--kufi);font-weight:600;font-size:18px;min-width:30px;text-align:center;color:var(--ink-2)}
+.row .b{flex:1;min-width:0}
+.row .t{font-weight:600}
+.row .s{font-size:13px;color:var(--ink-2)}
+.empty{padding:16px;color:var(--ink-2);font-size:14px}
+.tag{display:inline-block;font-size:12px;font-weight:600;padding:1px 8px;border-radius:999px;white-space:nowrap}
+.tag.late{background:var(--late-soft);color:var(--late)}
+.tag.absent{background:var(--absent-soft);color:var(--absent)}
+.tag.violation{background:var(--viol-soft);color:var(--viol)}
+.tag.ok{background:var(--ok-soft);color:var(--ok)}
+.tag.warn{background:var(--brass-soft);color:var(--brass)}
+.alert-row .dot{width:9px;height:9px;border-radius:50%;flex:none;background:var(--brass)}
+.alert-row.hi .dot{background:var(--absent)}
+.shortcuts{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.shortcuts a{display:block;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;text-decoration:none}
+.shortcuts a:hover{border-color:var(--ink-2)}
+.shortcuts a b{display:block;font-size:14px}
+.shortcuts a span{font-size:12px;color:var(--ink-2)}
+
+/* ---------- pages ---------- */
+.page-h{display:flex;align-items:end;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.page-h h1{font-family:var(--kufi);font-size:32px;margin:0;line-height:1.2}
+.page-h p{margin:0;color:var(--ink-2);font-size:14px;flex-basis:100%}
+.tools{display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin-bottom:14px}
+.field{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--ink-2)}
+.field input,.field select{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 10px;min-height:38px;font-size:14px;color:var(--ink)}
+.field input[type=search]{min-width:200px}
+.field input[type=number]{width:80px}
+.tools .end{margin-inline-start:auto;display:flex;gap:8px}
+.tbl-wrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:right;padding:9px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+td.wrap{white-space:normal;min-width:200px}
+th{font-size:12px;color:var(--ink-2);font-weight:600;background:var(--sunk);position:sticky;top:0}
+tbody tr:last-child td{border-bottom:0}
+td.num{font-variant-numeric:tabular-nums;text-align:center}
+tr.flag td{background:var(--absent-soft)}
+.count-line{font-size:13px;color:var(--ink-2);margin:8px 2px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+
+/* ---------- login ---------- */
+.login{min-height:100vh;display:grid;place-items:center;padding:24px}
+.login-card{width:min(420px,100%)}
+.login-card h1{font-family:var(--kufi);font-size:54px;margin:0;line-height:1.1}
+.login-card p{color:var(--ink-2);margin:8px 0 22px}
+.login-card form{display:flex;flex-direction:column;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px}
+.login-card label{font-size:13px;color:var(--ink-2)}
+.login-card input{width:100%;border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:10px 12px;font-size:16px}
+.login-card .alt{margin-top:14px;text-align:center;font-size:14px;color:var(--ink-2)}
+.login-card .alt button{background:none;border:0;color:var(--brass);font-weight:600;cursor:pointer;text-decoration:underline}
+.err-msg{color:var(--absent);font-size:14px;min-height:1.2em}
+
+.loading{padding:60px 0;text-align:center;color:var(--ink-2)}
+
+/* ---------- mobile ---------- */
+.mnav{display:none}
+@media (max-width: 900px){
+  .shell{grid-template-columns:1fr}
+  .side{display:none}
+  .main{padding-bottom:96px}
+  .mnav{display:flex;position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px));overflow-x:auto;z-index:10;gap:2px}
+  .mnav a{flex:1 0 64px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;text-decoration:none;color:var(--ink-2);padding:4px 2px;border-radius:8px}
+  .mnav a svg{width:20px;height:20px}
+  .mnav a[aria-current="page"]{color:var(--ink);background:var(--sunk);font-weight:600}
+  .day{grid-template-columns:1fr;gap:16px}
+  .cols,.grid2{grid-template-columns:1fr}
+  .tally{grid-template-columns:repeat(2,1fr)}
+  .tally > div:nth-child(3){border-inline-start:0}
+  .tally > div:nth-child(n+3){border-top:1px solid var(--line)}
+  .tools .end{margin-inline-start:0}
+  .slot{min-width:50px;padding:7px 6px}
+  .slot .tm .e{display:none}
+  .mnav a{white-space:nowrap;flex-basis:72px}
+  .field input[type=search]{min-width:0;width:100%}
+  .tools .field.grow{flex:1 1 100%}
+}
+.print-head{display:none}
+@media print{
+  .side,.mnav,.bar,.tools,.no-print{display:none !important}
+  .shell{display:block}
+  .main{padding:0}
+  body{background:#fff;color:#000;font-size:12px}
+  .print-head{display:block;margin-bottom:10px;border-bottom:1px solid #999;padding-bottom:6px}
+  .tbl-wrap,.list{border:0;overflow:visible}
+  th{background:#eee;position:static}
+  th,td{padding:4px 6px;border-bottom:1px solid #ccc}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div id="app"><div class="loading">جارٍ التحميل…</div></div>
+
+<script>
+(function(){
+"use strict";
+const CFG = window.SD_CONFIG;
+const LIVE_READY = !!(CFG.SUPABASE_URL && CFG.SUPABASE_ANON_KEY);
+const $app = document.getElementById("app");
+
+/* ---------------- helpers ---------------- */
+const esc = v => String(v == null ? "" : v).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const pad = n => String(n).padStart(2,"0");
+const iso = d => d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const parseISO = s => { const [y,m,d] = s.split("-").map(Number); return new Date(y, m-1, d, 12); };
+const addDays = (s, n) => { const d = parseISO(s); d.setDate(d.getDate()+n); return iso(d); };
+const fmt = (s, opt) => { try { return new Intl.DateTimeFormat("ar-SA-u-ca-gregory-nu-latn", opt).format(parseISO(s)); } catch(e){ return s; } };
+const hijri = s => { try { return new Intl.DateTimeFormat("ar-SA-u-ca-islamic-umalqura-nu-latn",{day:"numeric",month:"long",year:"numeric"}).format(parseISO(s)); } catch(e){ return ""; } };
+const weekday = s => fmt(s,{weekday:"long"});
+const hm = t => (t||"").slice(0,5);
+const nowHM = () => { const d = new Date(); return pad(d.getHours())+":"+pad(d.getMinutes()); };
+const TYPE_AR = {late:"تأخر", absent:"غياب", violation:"مخالفة"};
+const ROLE_AR = {admin:"المدير", deputy:"الوكيل", counselor:"الموجه الطلابي"};
+const ls = {
+  get(k, d){ try { const v = localStorage.getItem("sd:"+k); return v == null ? d : JSON.parse(v); } catch(e){ return d; } },
+  set(k, v){ try { localStorage.setItem("sd:"+k, JSON.stringify(v)); } catch(e){} }
+};
+const ss = {
+  get(k){ try { return sessionStorage.getItem("sd:"+k); } catch(e){ return null; } },
+  set(k, v){ try { v == null ? sessionStorage.removeItem("sd:"+k) : sessionStorage.setItem("sd:"+k, v); } catch(e){} }
+};
+
+/* ---------------- icons ---------------- */
+const I = {
+  home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>',
+  att:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg>',
+  cover:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 7h11M7 7l3-3M7 7l3 3M17 17H6m11 0l-3-3m3 3l-3 3"/></svg>',
+  sup:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/></svg>',
+  beh:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 21V4m0 0h11l-2 4 2 4H5"/></svg>',
+  rep:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 20V10m7 10V4m7 16v-7"/></svg>'
+};
+const ROUTES = [
+  ["home","اليوم",I.home], ["attendance","الغياب والتأخر",I.att], ["covers","الانتظار",I.cover],
+  ["supervision","الإشراف",I.sup], ["behavior","المتابعة السلوكية",I.beh], ["reports","التقارير",I.rep]
+];
+
+/* ---------------- data access ---------------- */
+async function rpcLive(fn, args){
+  const r = await fetch(CFG.SUPABASE_URL.replace(/\/$/,"") + "/rest/v1/rpc/" + fn, {
+    method:"POST",
+    headers:{ "Content-Type":"application/json", apikey:CFG.SUPABASE_ANON_KEY, Authorization:"Bearer "+CFG.SUPABASE_ANON_KEY },
+    body: JSON.stringify(args || {})
+  });
+  const txt = await r.text(); let j = null;
+  try { j = txt ? JSON.parse(txt) : null; } catch(e){ j = txt; }
+  if(!r.ok){
+    const e = new Error((j && j.message) || ("HTTP " + r.status));
+    e.status = r.status; e.code = j && j.code; throw e;
+  }
+  return j;
+}
+const isMissingFn = e => e && (e.code === "PGRST202" || e.status === 404);
+const isUnauth = e => e && /unauthorized/i.test(e.message || "");
+
+const S = { mode:null, token:null, role:null, name:"", t:null, dash:null, gate:null, today:null, err:null, range:{} };
+
+function rpc(fn, args){ return S.mode === "demo" ? Promise.resolve(DEMO.rpc(fn, args)) : rpcLive(fn, args); }
+
+async function loadCore(){
+  S.err = null;
+  try {
+    S.t = await rpc("pt_admin_data", {p_token:S.token});
+  } catch(e){
+    if(isUnauth(e)){ logout(true); return false; }
+    S.err = "تعذّر قراءة بيانات بوابة المعلم: " + e.message; S.t = null; return true;
+  }
+  S.role = S.t.role || S.role;
+  S.today = S.t.today || iso(new Date());
+  const today = S.today;
+  const [dash, gate] = await Promise.allSettled([
+    rpc("pt_admin_dashboard", {p_token:S.token, p_from:today, p_to:today}),
+    rpc("sd_gate_summary", {p_token:S.token, p_date:today})
+  ]);
+  S.dash = dash.status === "fulfilled" ? dash.value : null;
+  if(gate.status === "fulfilled") S.gate = gate.value;
+  else S.gate = { missing: isMissingFn(gate.reason), error: gate.reason && gate.reason.message };
+  return true;
+}
+
+/* ---------------- derived data ---------------- */
+const teacherName = id => { const t = (S.t.teachers||[]).find(x => x.id === id); return t ? t.name : "—"; };
+function isHoliday(d){ return (S.t.holidays||[]).find(h => h.start_date <= d && d <= h.end_date); }
+function isSchoolDay(d){
+  const wd = parseISO(d).getDay();
+  const days = (S.t.settings && S.t.settings.week_days) || [0,1,2,3,4];
+  return days.includes(wd) && !isHoliday(d);
+}
+function coversFor(d){
+  return (S.t.assignments||[]).filter(a => a.kind === "cover" && a.date === d)
+    .sort((a,b) => (a.lesson_no||0) - (b.lesson_no||0));
+}
+function absencesFor(d){ return (S.t.absences||[]).filter(a => a.date === d); }
+function uncoveredFor(d){
+  const wd = parseISO(d).getDay();
+  const covers = coversFor(d), out = [];
+  absencesFor(d).forEach(ab => {
+    (S.t.schedule||[]).filter(s => s.teacher_id === ab.teacher_id && s.day === wd
+        && (s.kind || "class") === "class" && s.class_name
+        && (!ab.from_lesson || s.lesson_no >= ab.from_lesson))
+      .forEach(s => {
+        const ok = covers.some(c => c.lesson_no === s.lesson_no && (c.absence_id === ab.id || c.class_name === s.class_name));
+        if(!ok) out.push({teacher:teacherName(ab.teacher_id), lesson_no:s.lesson_no, class_name:s.class_name, subject:s.subject});
+      });
+  });
+  return out.sort((a,b) => a.lesson_no - b.lesson_no);
+}
+function rotaFor(d){ return (S.t.rota||[]).filter(r => r.start_date <= d && d <= r.end_date); }
+function dutiesFor(d){ const wd = parseISO(d).getDay(); return (S.t.duties||[]).filter(x => x.day === wd); }
+function announcementsFor(d){ return (S.t.announcements||[]).filter(a => (!a.from_date || a.from_date <= d) && (!a.until_date || d <= a.until_date)); }
+function currentLesson(){
+  const t = nowHM();
+  return (S.t.periods||[]).find(p => hm(p.start_time) <= t && t < hm(p.end_time));
+}
+
+/* ---------------- shell ---------------- */
+function route(){ const h = (location.hash||"").replace(/^#\/?/,""); return ROUTES.some(r => r[0] === h) ? h : "home"; }
+
+function shell(inner){
+  const cur = route();
+  const school = (S.t && S.t.settings && S.t.settings.school_name) || "المدرسة";
+  const nav = ROUTES.map(([k,l,ic]) => `<a href="#/${k}" ${k===cur?'aria-current="page"':""}>${ic}<span>${l}</span></a>`).join("");
+  return `<div class="shell">
+    <aside class="side" aria-label="القائمة">
+      <div class="brand">اليوم الدراسي<small>${esc(school)}</small></div>
+      <nav class="nav">${nav}</nav>
+      <div class="portals"><span>البوابات</span>
+        <a href="${esc(CFG.PORTALS.teacherAdmin)}" target="_blank" rel="noopener">لوحة إدارة بوابة المعلم</a>
+        <a href="${esc(CFG.PORTALS.attendance)}" target="_blank" rel="noopener">بوابة حضور الطالب</a>
+        <a href="${esc(CFG.PORTALS.rollcall)}" target="_blank" rel="noopener">كشف التحضير</a>
+        <a href="${esc(CFG.PORTALS.teacher)}" target="_blank" rel="noopener">بوابة المعلم</a>
+      </div>
+    </aside>
+    <main class="main">
+      <div class="bar">
+        ${S.mode === "demo" ? '<span class="chip demo">عرض تجريبي ببيانات وهمية</span>' : '<span class="chip">متصل ببوابة المعلم</span>'}
+        <div class="who">${S.name ? esc(S.name)+" — " : ""}${esc(ROLE_AR[S.role]||"")}
+          <button class="btn ghost" id="refresh" type="button">تحديث</button>
+          <button class="btn ghost" id="logout" type="button">${S.mode==="demo"?"إنهاء العرض":"تسجيل الخروج"}</button>
+        </div>
+      </div>
+      ${S.mode === "demo" ? '<div class="banner"><b>بيانات وهمية:</b> هذه الأسماء والأرقام مولّدة للتجربة فقط، واللوحة غير متصلة بالبوابتين في هذا الوضع.</div>' : ""}
+      ${S.err ? `<div class="notice err">${esc(S.err)}</div>` : ""}
+      ${inner}
+    </main>
+    <nav class="mnav" aria-label="القائمة">${nav}</nav>
+  </div>`;
+}
+
+function bindShell(){
+  const lo = document.getElementById("logout"); if(lo) lo.onclick = () => logout(false);
+  const rf = document.getElementById("refresh"); if(rf) rf.onclick = async () => { rf.disabled = true; await loadCore(); render(); };
+}
+
+/* ---------------- pages ---------------- */
+function gateNotice(){
+  if(!S.gate || (!S.gate.missing && !S.gate.error)) return "";
+  if(S.gate.missing) return `<div class="notice">بيانات بوابة الحضور غير مربوطة بعد: طبقة القراءة الآمنة (ملف <b>sql/01_sd_gate_functions.sql</b>) لم تُطبَّق على قاعدة البيانات. إلى أن تُطبَّق، استخدم <a href="${esc(CFG.PORTALS.attendance)}" target="_blank" rel="noopener">بوابة حضور الطالب</a> مباشرة.</div>`;
+  return `<div class="notice err">تعذّر قراءة بيانات الحضور: ${esc(S.gate.error)}</div>`;
+}
+const gateOK = () => S.gate && !S.gate.missing && !S.gate.error;
+
+function pageHome(){
+  const d = S.today, school = isSchoolDay(d), hol = isHoliday(d);
+  const periods = S.t.periods || [], covers = coversFor(d), unc = uncoveredFor(d);
+  const cur = currentLesson(), t = nowHM();
+  const band = periods.length ? periods.map(p => {
+    if(p.kind === "break") return `<div class="slot brk" title="${esc(p.label)}">${esc(p.label)}</div>`;
+    const cls = !school ? "" : (cur && cur.id === p.id) ? "now" : (hm(p.end_time) <= t ? "past" : "");
+    const nc = covers.filter(c => c.lesson_no === p.lesson_no).length;
+    const nu = unc.filter(u => u.lesson_no === p.lesson_no).length;
+    return `<div class="slot ${cls}"><div class="no">${esc(p.lesson_no)}</div><div class="tm">${hm(p.start_time)}<span class="e">–${hm(p.end_time)}</span></div>
+      ${nu ? `<span class="cov unc" title="حصص بلا بديل">${nu}</span>` : nc ? `<span class="cov" title="حصص انتظار">${nc}</span>` : ""}</div>`;
+  }).join("") : '<div class="empty">لا يوجد توقيت حصص في بوابة المعلم.</div>';
+
+  const g = gateOK() ? S.gate.counts : null;
+  const tally = `<div class="tally ${g?"":"off"}">
+    <div class="late"><div class="n">${g?g.late:"—"}</div><div class="l">متأخر</div></div>
+    <div class="absent"><div class="n">${g?(g.absent - g.absent_excused):"—"}</div><div class="l">غائب بلا عذر</div></div>
+    <div class="exc"><div class="n">${g?g.absent_excused:"—"}</div><div class="l">غائب بعذر</div></div>
+    <div class="viol"><div class="n">${g?g.violation:"—"}</div><div class="l">مخالفة</div></div></div>`;
+
+  /* covers grouped */
+  const abs = absencesFor(d);
+  const coverRows = covers.map(c => `<div class="row"><div class="k">${esc(c.lesson_no||"")}</div><div class="b">
+      <div class="t">${esc(teacherName(c.teacher_id))}</div><div class="s">${esc(c.class_name||"")}${c.title?" — "+esc(c.title):""}</div></div>
+      ${c.seen_at ? '<span class="tag ok">اطّلع</span>' : '<span class="tag warn">لم يطّلع</span>'}</div>`).join("");
+  const uncRows = unc.map(u => `<div class="row"><div class="k">${esc(u.lesson_no)}</div><div class="b"><div class="t">${esc(u.class_name)} — بلا بديل</div><div class="s">حصة ${esc(u.teacher)}${u.subject?" ("+esc(u.subject)+")":""}</div></div><span class="tag absent">تحتاج توزيع</span></div>`).join("");
+
+  /* supervision */
+  const rota = rotaFor(d), duties = dutiesFor(d);
+  const supRows = rota.map(r => {
+    const names = (r.teacher_ids||[]).map(teacherName).concat(r.extra_names ? r.extra_names.split(/[,،\n]/).map(s=>s.trim()).filter(Boolean) : []);
+    return `<div class="row"><div class="b"><div class="t">${esc(names.join("، ")||"—")}</div><div class="s">${esc(r.label||"")}${r.place?" — "+esc(r.place):""}</div></div></div>`;
+  }).join("") + duties.map(x => `<div class="row"><div class="b"><div class="t">${esc(teacherName(x.teacher_id))}</div><div class="s">${esc(x.kind||"")}${x.place?" — "+esc(x.place):""}${x.time_label?" — "+esc(x.time_label):""}</div></div></div>`).join("");
+
+  /* alerts */
+  const al = [];
+  if(unc.length) al.push(["hi", `${unc.length} حصة بلا معلم بديل`, "وزّعها من لوحة إدارة بوابة المعلم", CFG.PORTALS.teacherAdmin]);
+  const unseen = covers.filter(c => !c.seen_at).length;
+  if(unseen) al.push(["", `${unseen} تكليف انتظار لم يطّلع عليه المعلم`, "", ""]);
+  if(gateOK()){
+    const notSent = S.gate.records.filter(r => r.type === "absent" && !r.sent && !r.excused).length;
+    if(notSent) al.push(["hi", `${notSent} غائب لم يُرسل لولي أمره إشعار`, "الإرسال يتم من بوابة الحضور", CFG.PORTALS.attendance]);
+    if(S.gate.open_referrals) al.push(["", `${S.gate.open_referrals} إحالة مفتوحة للموجه الطلابي`, "من بوابة الحضور", CFG.PORTALS.attendance]);
+    const rc = S.gate.rollcalls.length;
+    al.push(["", `كشوف التحضير المقفلة اليوم: ${rc}`, rc ? S.gate.rollcalls.map(r => r.class).join("، ") : "لم يُقفل أي كشف بعد", CFG.PORTALS.rollcall]);
+  }
+  if(S.dash){
+    if(S.dash.refs && S.dash.refs.new) al.push(["", `${S.dash.refs.new} إحالة جديدة من المعلمين اليوم`, "من بوابة المعلم", CFG.PORTALS.teacherAdmin]);
+    if(S.dash.notices) al.push(["", `${S.dash.notices} إشعار غياب/استئذان من المعلمين يبدأ اليوم`, "", CFG.PORTALS.teacherAdmin]);
+    if(S.dash.inq && S.dash.inq.sent) al.push(["", `${S.dash.inq.sent} طلب إفادة بانتظار رد المعلم`, "", CFG.PORTALS.teacherAdmin]);
+  }
+  announcementsFor(d).forEach(a => al.push(["", a.text, "تعميم في بوابة المعلم", ""]));
+  const alertRows = al.map(([lv,tx,sub,href]) => `<div class="row alert-row ${lv}"><span class="dot"></span><div class="b"><div class="t">${esc(tx)}</div>${sub?`<div class="s">${esc(sub)}</div>`:""}</div>${href?`<a class="btn ghost" href="${esc(href)}" target="_blank" rel="noopener">فتح</a>`:""}</div>`).join("");
+
+  return `
+  <section class="day">
+    <div><h1>${esc(weekday(d))}</h1>
+      <div class="dates"><strong>${esc(fmt(d,{day:"numeric",month:"long",year:"numeric"}))}</strong><span>${esc(hijri(d))}</span></div></div>
+    <div class="band-wrap">
+      ${school ? `<div class="band-title"><span>${cur ? "الآن: الحصة "+esc(cur.lesson_no) : "اليوم الدراسي"}</span><span>${covers.length} حصة انتظار${unc.length?" — "+unc.length+" بلا بديل":""}</span></div><div class="band">${band}</div>`
+               : `<div class="offday">${hol ? esc(hol.title) : "ليس يوم دراسة"}</div>`}
+    </div>
+  </section>
+  ${gateNotice()}
+  ${tally}
+  <div class="cols">
+    <div>
+      <section class="panel"><h2>الانتظار اليوم <span class="meta">${abs.length} معلم غائب</span><a href="#/covers">التفاصيل</a></h2>
+        <div class="list">${uncRows + coverRows || '<div class="empty">لا توجد حصص انتظار مسجلة اليوم.</div>'}</div></section>
+      <section class="panel"><h2>إشراف اليوم<a href="#/supervision">الجدول</a></h2>
+        <div class="list">${supRows || '<div class="empty">لا يوجد إشراف مسجل لهذا اليوم في بوابة المعلم.</div>'}</div></section>
+    </div>
+    <div>
+      <section class="panel"><h2>تحتاج متابعة</h2>
+        <div class="list">${alertRows || '<div class="empty">لا يوجد ما يحتاج متابعة الآن.</div>'}</div></section>
+      <section class="panel"><h2>اختصارات</h2>
+        <div class="shortcuts">
+          <a href="${esc(CFG.PORTALS.attendance)}" target="_blank" rel="noopener"><b>تسجيل تأخر أو غياب</b><span>بوابة حضور الطالب</span></a>
+          <a href="${esc(CFG.PORTALS.rollcall)}" target="_blank" rel="noopener"><b>كشف التحضير</b><span>رفع الحضور لكل فصل</span></a>
+          <a href="${esc(CFG.PORTALS.teacherAdmin)}" target="_blank" rel="noopener"><b>تغييب معلم وتوزيع الانتظار</b><span>لوحة إدارة بوابة المعلم</span></a>
+          <a href="${esc(CFG.PORTALS.teacher)}" target="_blank" rel="noopener"><b>بوابة المعلم</b><span>دخول المعلم برمزه</span></a>
+        </div></section>
+    </div>
+  </div>`;
+}
+
+/* ---------- range loader (attendance / behavior / reports) ---------- */
+async function loadRange(from, to){
+  if(!gateOK()) return null;
+  const key = from + "|" + to;
+  if(S.range[key]) return S.range[key];
+  const rows = await rpc("sd_gate_records", {p_token:S.token, p_from:from, p_to:to});
+  S.range = {}; S.range[key] = rows || [];
+  return S.range[key];
+}
+function rangeTools(id, from, to, extra){
+  return `<div class="tools" id="${id}">
+    <label class="field">من<input type="date" name="from" value="${esc(from)}"></label>
+    <label class="field">إلى<input type="date" name="to" value="${esc(to)}"></label>
+    ${extra||""}
+    <div class="end"><button class="btn" type="button" data-act="print">طباعة</button><button class="btn" type="button" data-act="csv">تصدير CSV</button></div>
+  </div>`;
+}
+function printHead(title, from, to){
+  const school = (S.t.settings && S.t.settings.school_name) || "";
+  return `<div class="print-head"><b>${esc(school)}</b> — ${esc(title)}<br>${from===to ? esc(fmt(from,{weekday:"long",day:"numeric",month:"long",year:"numeric"})) : "من "+esc(from)+" إلى "+esc(to)}${S.mode==="demo"?" — بيانات وهمية":""}</div>`;
+}
+function downloadCSV(name, head, rows){
+  const q = v => '"' + String(v == null ? "" : v).replace(/"/g,'""') + '"';
+  const txt = "\uFEFF" + [head].concat(rows).map(r => r.map(q).join(",")).join("\r\n");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([txt], {type:"text/csv;charset=utf-8"}));
+  a.download = name + ".csv"; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+const classLabel = r => [r.grade, r.cls].filter(Boolean).join(" / ");
+function classOptions(rows, sel){
+  const set = [...new Set(rows.map(classLabel).filter(Boolean))].sort();
+  return `<option value="">كل الفصول</option>` + set.map(c => `<option ${c===sel?"selected":""}>${esc(c)}</option>`).join("");
+}
+
+/* ---------- attendance ---------- */
+const AV = { from:null, to:null, type:"", cls:"", q:"" };
+async function pageAttendance(){
+  AV.from = AV.from || S.today; AV.to = AV.to || S.today;
+  if(!gateOK()) return head("الغياب والتأخر","سجلات بوابة حضور الطالب.") + gateNotice();
+  let rows;
+  try { rows = await loadRange(AV.from, AV.to); } catch(e){ return head("الغياب والتأخر","") + `<div class="notice err">${esc(e.message === "range_too_large" ? "المدة طويلة؛ اختر 190 يومًا أو أقل." : e.message)}</div>`; }
+  rows = rows.filter(r => r.type === "late" || r.type === "absent");
+  const f = rows.filter(r => (!AV.type || r.type === AV.type || (AV.type === "excused" && r.type === "absent" && r.excused) || (AV.type === "unexcused" && r.type === "absent" && !r.excused))
+      && (!AV.cls || classLabel(r) === AV.cls) && (!AV.q || (r.name||"").includes(AV.q)));
+  S._csv = () => downloadCSV("الغياب-والتأخر-"+AV.from+"-"+AV.to, ["التاريخ","الطالب","الفصل","النوع","الوقت","العذر","أُرسل الإشعار","ملاحظة"],
+    f.map(r => [r.date, r.name, classLabel(r), TYPE_AR[r.type], r.time, r.type==="absent"?(r.excused?"بعذر":"بلا عذر"):"", r.sent?"نعم":"لا", r.note]));
+  const extra = `<label class="field">النوع<select name="type">
+      <option value="">الكل</option><option value="late" ${AV.type==="late"?"selected":""}>تأخر</option><option value="absent" ${AV.type==="absent"?"selected":""}>غياب</option>
+      <option value="unexcused" ${AV.type==="unexcused"?"selected":""}>غياب بلا عذر</option><option value="excused" ${AV.type==="excused"?"selected":""}>غياب بعذر</option></select></label>
+    <label class="field">الفصل<select name="cls">${classOptions(rows, AV.cls)}</select></label>
+    <label class="field grow">بحث بالاسم<input type="search" name="q" value="${esc(AV.q)}" placeholder="اسم الطالب"></label>`;
+  return head("الغياب والتأخر","قراءة فقط من بوابة حضور الطالب. التسجيل والإرسال لأولياء الأمور يبقيان في البوابة نفسها.")
+    + rangeTools("att-tools", AV.from, AV.to, extra) + printHead("الغياب والتأخر", AV.from, AV.to)
+    + `<div class="tbl-wrap"><table><thead><tr><th>التاريخ</th><th>الطالب</th><th>الفصل</th><th>النوع</th><th>الوقت</th><th>العذر</th><th>الإشعار</th></tr></thead><tbody>
+    ${f.map(r => `<tr><td>${esc(r.date)}</td><td>${esc(r.name)}</td><td>${esc(classLabel(r))}</td><td><span class="tag ${r.type}">${TYPE_AR[r.type]}</span></td><td>${esc(r.time)}</td>
+      <td>${r.type==="absent" ? (r.excused ? '<span class="tag ok">بعذر</span>' : "بلا عذر") : ""}</td><td>${r.sent?"أُرسل":"—"}</td></tr>`).join("") || '<tr><td colspan="7" class="empty">لا توجد سجلات في هذه المدة.</td></tr>'}
+    </tbody></table></div><div class="count-line">${f.length} سجل</div>`;
+}
+function bindRangeTools(id, st, rerender){
+  const box = document.getElementById(id); if(!box) return;
+  box.querySelectorAll("input,select").forEach(el => {
+    const ev = el.type === "search" ? "input" : "change";
+    el.addEventListener(ev, () => {
+      st[el.name] = el.value;
+      if(el.name === "from" && st.to && st.to < st.from) st.to = st.from;
+      if(el.type === "search"){ clearTimeout(st._t); st._t = setTimeout(rerender, 250); } else rerender();
+    });
+  });
+  box.querySelector('[data-act="print"]').onclick = () => window.print();
+  box.querySelector('[data-act="csv"]').onclick = () => S._csv && S._csv();
+}
+const head = (t, p) => `<div class="page-h"><h1>${esc(t)}</h1>${p?`<p>${esc(p)}</p>`:""}</div>`;
+
+/* ---------- covers ---------- */
+const CV = { date:null };
+function pageCovers(){
+  const d = CV.date = CV.date || S.today;
+  const abs = absencesFor(d), covers = coversFor(d), unc = uncoveredFor(d);
+  const tally = {};
+  covers.forEach(c => { const n = teacherName(c.teacher_id); tally[n] = (tally[n]||0) + 1; });
+  S._csv = () => downloadCSV("الانتظار-"+d, ["الحصة","الفصل","المعلم البديل","المعلم الغائب","اطّلع"],
+    covers.map(c => { const ab = abs.find(a => a.id === c.absence_id); return [c.lesson_no, c.class_name, teacherName(c.teacher_id), ab ? teacherName(ab.teacher_id) : "", c.seen_at?"نعم":"لا"]; })
+    .concat(unc.map(u => [u.lesson_no, u.class_name, "بلا بديل", u.teacher, ""])));
+  return head("حصص الانتظار","من بوابة المعلم (آخر 30 يومًا من الغياب). تغييب المعلم وتوزيع البدلاء يتم من لوحة إدارة بوابة المعلم.")
+    + `<div class="tools" id="cv-tools"><label class="field">اليوم<input type="date" name="date" value="${esc(d)}" max="${esc(addDays(S.today,14))}"></label>
+       <a class="btn" href="${esc(CFG.PORTALS.teacherAdmin)}" target="_blank" rel="noopener">توزيع الانتظار في بوابة المعلم</a>
+       <div class="end"><button class="btn" type="button" data-act="print">طباعة</button><button class="btn" type="button" data-act="csv">تصدير CSV</button></div></div>`
+    + printHead("حصص الانتظار", d, d)
+    + `<div class="grid2"><section class="panel"><h2>المعلمون الغائبون <span class="meta">${abs.length}</span></h2><div class="list">
+        ${abs.map(a => `<div class="row"><div class="b"><div class="t">${esc(teacherName(a.teacher_id))}</div><div class="s">${a.from_lesson ? "من الحصة "+esc(a.from_lesson) : "اليوم كاملًا"}${a.note?" — "+esc(a.note):""}</div></div></div>`).join("") || '<div class="empty">لا يوجد معلم غائب مسجل.</div>'}
+      </div></section>
+      <section class="panel"><h2>عدد حصص الانتظار لكل معلم</h2><div class="list">
+        ${Object.entries(tally).sort((a,b)=>b[1]-a[1]).map(([n,c]) => `<div class="row"><div class="b"><div class="t">${esc(n)}</div></div><span class="tag warn">${c}</span></div>`).join("") || '<div class="empty">لا توجد تكليفات.</div>'}
+      </div></section></div>
+      <section class="panel"><h2>التوزيع حسب الحصة</h2><div class="tbl-wrap"><table><thead><tr><th>الحصة</th><th>الفصل</th><th>المعلم البديل</th><th>بدلًا من</th><th>الحالة</th></tr></thead><tbody>
+      ${unc.map(u => `<tr class="flag"><td class="num">${esc(u.lesson_no)}</td><td>${esc(u.class_name)}</td><td>—</td><td>${esc(u.teacher)}</td><td><span class="tag absent">بلا بديل</span></td></tr>`).join("")}
+      ${covers.map(c => { const ab = abs.find(a => a.id === c.absence_id); return `<tr><td class="num">${esc(c.lesson_no||"")}</td><td>${esc(c.class_name)}</td><td>${esc(teacherName(c.teacher_id))}</td><td>${ab?esc(teacherName(ab.teacher_id)):"—"}</td><td>${c.seen_at?'<span class="tag ok">اطّلع</span>':'<span class="tag warn">لم يطّلع</span>'}</td></tr>`; }).join("")}
+      ${!covers.length && !unc.length ? '<tr><td colspan="5" class="empty">لا توجد حصص انتظار في هذا اليوم.</td></tr>' : ""}
+      </tbody></table></div></section>`;
+}
+
+/* ---------- supervision ---------- */
+const SV = { date:null };
+function pageSupervision(){
+  const d = SV.date = SV.date || S.today;
+  const all = (S.t.rota||[]).slice().sort((a,b) => (a.start_date > b.start_date ? 1 : -1));
+  const names = r => (r.teacher_ids||[]).map(teacherName).concat(r.extra_names ? r.extra_names.split(/[,،\n]/).map(s=>s.trim()).filter(Boolean) : []);
+  S._csv = () => downloadCSV("جدول-الإشراف", ["الفترة","من","إلى","المعلمون","المكان"], all.map(r => [r.label, r.start_date, r.end_date, names(r).join("، "), r.place]));
+  const duties = dutiesFor(d);
+  return head("الإشراف","جدول الإشراف كما هو محفوظ في بوابة المعلم. التعديل من لوحة إدارتها.")
+    + `<div class="tools" id="sv-tools"><label class="field">اليوم<input type="date" name="date" value="${esc(d)}"></label>
+       <div class="end"><button class="btn" type="button" data-act="print">طباعة</button><button class="btn" type="button" data-act="csv">تصدير CSV</button></div></div>`
+    + printHead("جدول الإشراف", d, d)
+    + `<section class="panel"><h2>المكلّفون يوم ${esc(weekday(d))}</h2><div class="list">
+      ${rotaFor(d).map(r => `<div class="row"><div class="b"><div class="t">${esc(names(r).join("، ")||"—")}</div><div class="s">${esc(r.label)}${r.place?" — "+esc(r.place):""}</div></div></div>`).join("")}
+      ${duties.map(x => `<div class="row"><div class="b"><div class="t">${esc(teacherName(x.teacher_id))}</div><div class="s">${esc(x.kind)}${x.place?" — "+esc(x.place):""}${x.time_label?" — "+esc(x.time_label):""}</div></div></div>`).join("")}
+      ${!rotaFor(d).length && !duties.length ? '<div class="empty">لا يوجد إشراف مسجل لهذا اليوم.</div>' : ""}</div></section>
+      <section class="panel"><h2>الجدول الكامل</h2><div class="tbl-wrap"><table><thead><tr><th>الفترة</th><th>من</th><th>إلى</th><th>المعلمون</th><th>المكان</th></tr></thead><tbody>
+      ${all.map(r => `<tr class="${r.start_date<=d && d<=r.end_date ? "flag" : ""}"><td>${esc(r.label)}</td><td>${esc(r.start_date)}</td><td>${esc(r.end_date)}</td><td class="wrap">${esc(names(r).join("، "))}</td><td>${esc(r.place)}</td></tr>`).join("") || '<tr><td colspan="5" class="empty">لا يوجد جدول إشراف.</td></tr>'}
+      </tbody></table></div></section>`;
+}
+
+/* ---------- behavior ---------- */
+const BV = { from:null, to:null, degree:"", cls:"", q:"" };
+async function pageBehavior(){
+  BV.from = BV.from || addDays(S.today, -6); BV.to = BV.to || S.today;
+  let teacherSide = "";
+  try {
+    const dash = await rpc("pt_admin_dashboard", {p_token:S.token, p_from:BV.from, p_to:BV.to});
+    teacherSide = `<section class="panel"><h2>ملاحظات المعلمين السلوكية <span class="meta">الأكثر تكرارًا — من بوابة المعلم</span></h2><div class="list">
+      ${(dash.behavior||[]).map(b => `<div class="row"><div class="b"><div class="t">${esc(b.name)}</div><div class="s">${esc(b.class_name)}</div></div><span class="tag violation">${esc(b.n)}</span></div>`).join("") || '<div class="empty">لا توجد ملاحظات في هذه المدة.</div>'}
+      </div></section>`;
+  } catch(e){ teacherSide = `<div class="notice err">تعذّر قراءة ملاحظات المعلمين: ${esc(e.message)}</div>`; }
+
+  if(!gateOK()) return head("المتابعة السلوكية","") + gateNotice() + teacherSide;
+  let rows;
+  try { rows = await loadRange(BV.from, BV.to); } catch(e){ return head("المتابعة السلوكية","") + `<div class="notice err">${esc(e.message)}</div>`; }
+  rows = rows.filter(r => r.type === "violation");
+  const f = rows.filter(r => (!BV.degree || String(r.degree) === BV.degree) && (!BV.cls || classLabel(r) === BV.cls) && (!BV.q || (r.name||"").includes(BV.q)));
+  const cfg = (S.gate.violations_config || []);
+  const degrees = [...new Set(cfg.map(v => v.d).concat(rows.map(r => r.degree)))].filter(x => x !== null && x !== undefined && x !== "").sort();
+  S._csv = () => downloadCSV("المخالفات-"+BV.from+"-"+BV.to, ["التاريخ","الطالب","الفصل","المخالفة","الدرجة","ملاحظة"], f.map(r => [r.date, r.name, classLabel(r), r.vtype, r.degree, r.note]));
+  const extra = `<label class="field">الدرجة<select name="degree"><option value="">الكل</option>${degrees.map(x => `<option ${String(x)===BV.degree?"selected":""}>${esc(x)}</option>`).join("")}</select></label>
+    <label class="field">الفصل<select name="cls">${classOptions(rows, BV.cls)}</select></label>
+    <label class="field grow">بحث بالاسم<input type="search" name="q" value="${esc(BV.q)}" placeholder="اسم الطالب"></label>`;
+  return head("المتابعة السلوكية","المخالفات كما سُجّلت في بوابة الحضور. أنواع المخالفات ودرجاتها تُدار من إعدادات بوابة الحضور، وتظهر هنا كما هي دون اعتماد من هذه اللوحة.")
+    + rangeTools("bh-tools", BV.from, BV.to, extra) + printHead("المخالفات السلوكية", BV.from, BV.to)
+    + `<div class="tbl-wrap"><table><thead><tr><th>التاريخ</th><th>الطالب</th><th>الفصل</th><th>المخالفة</th><th>الدرجة</th></tr></thead><tbody>
+      ${f.map(r => `<tr><td>${esc(r.date)}</td><td>${esc(r.name)}</td><td>${esc(classLabel(r))}</td><td class="wrap">${esc(r.vtype)}</td><td class="num">${esc(r.degree)}</td></tr>`).join("") || '<tr><td colspan="5" class="empty">لا توجد مخالفات في هذه المدة.</td></tr>'}
+      </tbody></table></div><div class="count-line">${f.length} مخالفة</div>
+      <div class="grid2 no-print">${teacherSide}
+      <section class="panel"><h2>قائمة المخالفات المحفوظة <span class="meta">${cfg.length} — تُعدَّل من بوابة الحضور</span></h2><div class="list">
+        ${cfg.slice(0,40).map(v => `<div class="row"><div class="b"><div class="s" style="color:var(--ink)">${esc(v.n)}</div></div><span class="tag violation">الدرجة ${esc(v.d)}</span></div>`).join("") || '<div class="empty">لا توجد قائمة مخالفات في بوابة الحضور.</div>'}
+        ${cfg.length > 40 ? `<div class="empty">و${cfg.length-40} أخرى في بوابة الحضور.</div>` : ""}
+      </div></section></div>`;
+}
+
+/* ---------- reports ---------- */
+const RV = { from:null, to:null, thLate:null, thAbs:null, onlyFlag:false, q:"" };
+async function pageReports(){
+  if(!RV.from){
+    const firstRota = (S.t.rota||[]).map(r => r.start_date).sort()[0];
+    RV.from = ls.get("termStart", firstRota && firstRota < S.today ? firstRota : addDays(S.today,-30));
+    if(RV.from > S.today || RV.from < addDays(S.today,-190)) RV.from = addDays(S.today,-30);
+  }
+  RV.to = RV.to || S.today;
+  if(RV.thLate == null) RV.thLate = ls.get("thLate", 5);
+  if(RV.thAbs == null) RV.thAbs = ls.get("thAbs", 5);
+  if(!gateOK()) return head("التقارير","") + gateNotice();
+  let rows;
+  try { rows = await loadRange(RV.from, RV.to); } catch(e){ return head("التقارير","") + `<div class="notice err">${esc(e.message === "range_too_large" ? "المدة طويلة؛ اختر 190 يومًا أو أقل." : e.message)}</div>`; }
+  const byDay = {}, byStu = {};
+  rows.forEach(r => {
+    const d = byDay[r.date] = byDay[r.date] || {late:0, abs:0, exc:0, vio:0};
+    const k = r.sid || r.name;
+    const s = byStu[k] = byStu[k] || {name:r.name, cls:classLabel(r), late:0, abs:0, exc:0, vio:0};
+    if(r.type === "late"){ d.late++; s.late++; }
+    else if(r.type === "absent"){ if(r.excused){ d.exc++; s.exc++; } else { d.abs++; s.abs++; } }
+    else if(r.type === "violation"){ d.vio++; s.vio++; }
+  });
+  const stu = Object.values(byStu).map(s => Object.assign(s, {flag: s.late >= RV.thLate || s.abs >= RV.thAbs}))
+    .filter(s => (!RV.onlyFlag || s.flag) && (!RV.q || s.name.includes(RV.q)))
+    .sort((a,b) => (b.flag - a.flag) || (b.abs + b.late) - (a.abs + a.late));
+  const days = Object.keys(byDay).sort().reverse();
+  const flagged = Object.values(byStu).filter(s => s.late >= RV.thLate || s.abs >= RV.thAbs).length;
+  S._csv = () => downloadCSV("تقرير-الطلاب-"+RV.from+"-"+RV.to, ["الطالب","الفصل","تأخر","غياب بلا عذر","غياب بعذر","مخالفات","بلغ حد الإحالة"],
+    stu.map(s => [s.name, s.cls, s.late, s.abs, s.exc, s.vio, s.flag?"نعم":""]));
+  const extra = `<label class="field">حد التأخر<input type="number" min="1" name="thLate" value="${esc(RV.thLate)}"></label>
+    <label class="field">حد الغياب بلا عذر<input type="number" min="1" name="thAbs" value="${esc(RV.thAbs)}"></label>
+    <label class="field">العرض<select name="onlyFlag"><option value="">كل الطلاب</option><option value="1" ${RV.onlyFlag?"selected":""}>من بلغ حد الإحالة فقط</option></select></label>
+    <label class="field grow">بحث بالاسم<input type="search" name="q" value="${esc(RV.q)}" placeholder="اسم الطالب"></label>`;
+  return head("التقارير","ملخص من سجلات بوابة الحضور. حدّا الإحالة قابلان للتعديل ويُحفظان في هذا المتصفح فقط.")
+    + rangeTools("rp-tools", RV.from, RV.to, extra) + printHead("تقرير الحضور والسلوك", RV.from, RV.to)
+    + `<div class="tally"><div class="late"><div class="n">${rows.filter(r=>r.type==="late").length}</div><div class="l">تأخر</div></div>
+       <div class="absent"><div class="n">${rows.filter(r=>r.type==="absent"&&!r.excused).length}</div><div class="l">غياب بلا عذر</div></div>
+       <div class="exc"><div class="n">${rows.filter(r=>r.type==="absent"&&r.excused).length}</div><div class="l">غياب بعذر</div></div>
+       <div class="viol"><div class="n">${flagged}</div><div class="l">بلغوا حد الإحالة</div></div></div>
+      <section class="panel"><h2>حسب الطالب <span class="meta">${stu.length}</span></h2><div class="tbl-wrap"><table><thead><tr><th>الطالب</th><th>الفصل</th><th>تأخر</th><th>غياب بلا عذر</th><th>غياب بعذر</th><th>مخالفات</th><th></th></tr></thead><tbody>
+      ${stu.map(s => `<tr class="${s.flag?"flag":""}"><td>${esc(s.name)}</td><td>${esc(s.cls)}</td><td class="num">${s.late}</td><td class="num">${s.abs}</td><td class="num">${s.exc}</td><td class="num">${s.vio}</td><td>${s.flag?'<span class="tag absent">للإحالة</span>':""}</td></tr>`).join("") || '<tr><td colspan="7" class="empty">لا توجد بيانات.</td></tr>'}
+      </tbody></table></div></section>
+      <section class="panel"><h2>حسب اليوم</h2><div class="tbl-wrap"><table><thead><tr><th>اليوم</th><th>التاريخ</th><th>تأخر</th><th>غياب بلا عذر</th><th>غياب بعذر</th><th>مخالفات</th></tr></thead><tbody>
+      ${days.map(d => `<tr><td>${esc(weekday(d))}</td><td>${esc(d)}</td><td class="num">${byDay[d].late}</td><td class="num">${byDay[d].abs}</td><td class="num">${byDay[d].exc}</td><td class="num">${byDay[d].vio}</td></tr>`).join("") || '<tr><td colspan="6" class="empty">لا توجد بيانات.</td></tr>'}
+      </tbody></table></div></section>`;
+}
+
+/* ---------------- login ---------------- */
+function loginView(msg){
+  $app.innerHTML = `<div class="login"><div class="login-card">
+    <h1>اليوم الدراسي</h1>
+    <p>لوحة يومية لإدارة المدرسة تقرأ من بوابة المعلم وبوابة حضور الطالب.</p>
+    <form id="lf" autocomplete="off">
+      <label for="pw">كلمة مرور لوحة الإدارة في بوابة المعلم (المدير أو الوكيل أو الموجه)</label>
+      <input id="pw" type="password" inputmode="text" required ${LIVE_READY?"":"disabled"}>
+      <div class="err-msg" id="lerr" role="alert">${esc(msg || (LIVE_READY ? "" : "الربط غير مفعّل: أضف المفتاح العام في قسم الإعدادات أعلى الملف."))}</div>
+      <button class="btn primary" type="submit" ${LIVE_READY?"":"disabled"}>دخول</button>
+    </form>
+    <div class="alt">أو <button type="button" id="demo">جرّب اللوحة ببيانات وهمية</button></div>
+  </div></div>`;
+  document.getElementById("demo").onclick = () => { S.mode = "demo"; S.token = "demo"; S.role = "admin"; S.name = "مستخدم تجريبي"; ss.set("mode","demo"); boot(); };
+  document.getElementById("lf").onsubmit = async ev => {
+    ev.preventDefault();
+    const btn = ev.target.querySelector("button"), err = document.getElementById("lerr"), pw = document.getElementById("pw");
+    btn.disabled = true; err.textContent = "";
+    try {
+      const r = await rpcLive("pt_admin_login", {p_password: pw.value});
+      pw.value = "";
+      if(r && r.token){
+        S.mode = "live"; S.token = r.token; S.role = r.role; S.name = r.name || "";
+        ss.set("mode","live"); ss.set("token", r.token); ss.set("role", r.role); ss.set("name", S.name);
+        boot();
+      } else {
+        err.textContent = r && r.error === "too_many" ? "محاولات كثيرة. انتظر 15 دقيقة ثم أعد المحاولة." : "كلمة المرور غير صحيحة.";
+      }
+    } catch(e){ err.textContent = "تعذّر الاتصال: " + e.message; }
+    btn.disabled = false;
+  };
+}
+async function logout(expired){
+  if(S.mode === "live" && S.token && !expired){ try { await rpcLive("pt_logout", {p_token:S.token}); } catch(e){} }
+  ["mode","token","role","name"].forEach(k => ss.set(k, null));
+  Object.assign(S, {mode:null, token:null, role:null, name:"", t:null, dash:null, gate:null, range:{}});
+  loginView(expired ? "انتهت الجلسة، سجّل الدخول من جديد." : "");
+}
+
+/* ---------------- render ---------------- */
+let renderSeq = 0;
+async function render(){
+  if(!S.t){ $app.innerHTML = shell(""); bindShell(); return; }
+  const seq = ++renderSeq, r = route();
+  const pages = {home:pageHome, attendance:pageAttendance, covers:pageCovers, supervision:pageSupervision, behavior:pageBehavior, reports:pageReports};
+  let html;
+  try { html = await pages[r](); } catch(e){ html = `<div class="notice err">خطأ في عرض الصفحة: ${esc(e.message)}</div>`; if(isUnauth(e)) return logout(true); }
+  if(seq !== renderSeq) return;
+  const y = window.scrollY;
+  $app.innerHTML = shell(html); bindShell();
+  if(r === "attendance") bindRangeTools("att-tools", AV, render);
+  if(r === "behavior") bindRangeTools("bh-tools", BV, render);
+  if(r === "reports") bindRangeTools("rp-tools", RV, () => {
+    RV.thLate = Math.max(1, +RV.thLate || 5); RV.thAbs = Math.max(1, +RV.thAbs || 5); RV.onlyFlag = !!RV.onlyFlag && RV.onlyFlag !== "";
+    ls.set("thLate", RV.thLate); ls.set("thAbs", RV.thAbs); ls.set("termStart", RV.from); render();
+  });
+  if(r === "covers") bindRangeTools("cv-tools", CV, render);
+  if(r === "supervision") bindRangeTools("sv-tools", SV, render);
+  const ae = document.activeElement;
+  if(!ae || ae === document.body) window.scrollTo(0, y);
+}
+window.addEventListener("hashchange", () => { window.scrollTo(0,0); render(); });
+
+async function boot(){
+  $app.innerHTML = '<div class="loading">جارٍ قراءة بيانات اليوم…</div>';
+  const ok = await loadCore();
+  if(ok) render();
+}
+
+/* ---------------- demo data (وهمية بالكامل) ---------------- */
+const DEMO = (function(){
+  const today = iso(new Date());
+  const wd = new Date().getDay();
+  const T = ["أحمد السالم","خالد العمري","سعد المطيري","فهد الشمري","ماجد الحربي","ناصر القحطاني","يوسف الدوسري","عمر الزهراني","بدر العتيبي","تركي الغامدي"]
+    .map((n,i) => ({id:"t"+i, name:"أ. "+n+" (وهمي)", subject:["قرآن","رياضيات","علوم","لغتي","إنجليزي","اجتماعيات","تفسير","حاسب","فنية","بدنية"][i], active:true, classes:[]}));
+  const CL = ["1/1","1/2","2/1","2/2","3/1","3/2"];
+  const P = [["07:00","07:45"],["07:45","08:30"],["08:30","09:15"],null,["09:35","10:20"],["10:20","11:05"],["11:05","11:50"],["11:50","12:35"]];
+  let ln = 0;
+  const periods = P.map((p,i) => p ? {id:i+1, sort:i, kind:"lesson", lesson_no:++ln, label:"الحصة "+ln, start_time:p[0]+":00", end_time:p[1]+":00"}
+                                   : {id:i+1, sort:i, kind:"break", lesson_no:null, label:"الفسحة", start_time:"09:15:00", end_time:"09:35:00"});
+  const schedule = [];
+  T.forEach((t,ti) => { for(let d=0; d<5; d++) for(let l=1; l<=7; l++) if((ti+d+l) % 3 !== 0) schedule.push({teacher_id:t.id, day:d, lesson_no:l, subject:t.subject, class_name:CL[(ti+l) % 6], kind:"class"}); });
+  const absences = [{id:"a1", teacher_id:"t2", date:today, note:"إجازة اضطرارية (وهمي)", from_lesson:null}, {id:"a2", teacher_id:"t6", date:today, note:"", from_lesson:4}];
+  const assignments = [];
+  const fillWd = wd <= 4 ? wd : 0;
+  schedule.filter(s => s.teacher_id === "t2" && s.day === fillWd).slice(0,3).forEach((s,i) => assignments.push({id:"c"+i, teacher_id:["t1","t4","t8"][i], kind:"cover", title:"حصة انتظار", date:today, lesson_no:s.lesson_no, class_name:s.class_name, absence_id:"a1", seen_at: i ? today+"T07:10:00Z" : null}));
+  const rota = [{id:"r1", sort:0, label:"الأسبوع الحالي", start_date:addDays(today,-2), end_date:addDays(today,2), teacher_ids:["t3","t7"], extra_names:"", kind:"both", place:"الساحة الشمالية"}];
+  const first = ["عبدالله","محمد","سلمان","فيصل","عبدالرحمن","مشعل","راكان","زياد","حمد","نواف","عبدالعزيز","سلطان"];
+  const last = ["المحمد","العلي","السعد","الحمد","الناصر","الصالح","العبدالله","الإبراهيم"];
+  const stu = []; for(let i=0;i<60;i++) stu.push({sid:"s"+i, name:first[i%12]+" "+last[(i*5)%8]+" (وهمي)", grade:["أول متوسط","ثاني متوسط","ثالث متوسط"][i%3], cls:String(1+(i%2))});
+  const V = [{d:1,n:"مخالفة تجريبية من الدرجة الأولى"},{d:2,n:"مخالفة تجريبية من الدرجة الثانية"},{d:3,n:"مخالفة تجريبية من الدرجة الثالثة"}];
+  const recs = []; let seed = 7; const rnd = () => (seed = (seed*9301+49297) % 233280) / 233280;
+  for(let k=0;k<45;k++){ const d = addDays(today,-k); const w = parseISO(d).getDay(); if(w===5||w===6) continue;
+    stu.forEach(s => { const x = rnd();
+      if(x < .06) recs.push(Object.assign({date:d, type:"late", time:"07:"+pad(5+Math.floor(rnd()*40)), vtype:"", degree:0, sent:true, excused:false, note:""}, s));
+      else if(x < .095){ const ex = rnd() < .3; recs.push(Object.assign({date:d, type:"absent", time:"", vtype:"", degree:0, sent: k>0 || rnd()<.6, excused:ex, note:""}, s)); }
+      else if(x < .105){ const v = V[Math.floor(rnd()*3)]; recs.push(Object.assign({date:d, type:"violation", time:"", vtype:v.n, degree:v.d, sent:false, excused:false, note:""}, s)); }
+    }); }
+  const data = { role:"admin", today,
+    settings:{school_name:"مدرسة تجريبية (بيانات وهمية)", week_days:[0,1,2,3,4], classes:CL, principal_name:"مستخدم تجريبي"},
+    announcements:[{id:"n1", sort:0, text:"اجتماع تجريبي للمعلمين بعد الحصة السادسة", from_date:today, until_date:today}],
+    periods, periods_all:periods, teachers:T, schedule, duties:[], absences, assignments, holidays:[], rota };
+  return { rpc(fn, a){
+    if(fn === "pt_admin_data") return data;
+    if(fn === "pt_admin_dashboard") return {refs:{total:2,new:1,done:1}, inq:{total:1,sent:1}, notices:1,
+      behavior: stu.slice(0,5).map((s,i) => ({name:s.name, class_name:CL[i], n:5-i}))};
+    if(fn === "sd_gate_summary"){ const r = recs.filter(x => x.date === a.p_date);
+      return { date:a.p_date, role:"admin", counts:{late:r.filter(x=>x.type==="late").length, absent:r.filter(x=>x.type==="absent").length, absent_excused:r.filter(x=>x.type==="absent"&&x.excused).length, violation:r.filter(x=>x.type==="violation").length},
+        records:r, rollcalls:[{class:"أول متوسط / 1", total:27, absent:2, by:"موظف تجريبي"},{class:"ثاني متوسط / 1", total:26, absent:1, by:"موظف تجريبي"}], open_referrals:3, violations_config:V }; }
+    if(fn === "sd_gate_records") return recs.filter(x => x.date >= a.p_from && x.date <= a.p_to);
+    throw new Error("غير متاح في العرض التجريبي");
+  }};
+})();
+
+/* ---------------- start ---------------- */
+(function start(){
+  const mode = ss.get("mode");
+  if(mode === "demo"){ S.mode = "demo"; S.token = "demo"; S.role = "admin"; S.name = "مستخدم تجريبي"; return boot(); }
+  if(mode === "live" && LIVE_READY && ss.get("token")){ S.mode = "live"; S.token = ss.get("token"); S.role = ss.get("role"); S.name = ss.get("name") || ""; return boot(); }
+  loginView();
+})();
+})();
+</script>
+</body>
+</html>
